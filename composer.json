@@ -1,0 +1,13 @@
+{
+    "name": "discoverygarden/embargo_inheritance",
+    "description": "Facilitate inheritance of embargo effects to child entities..",
+    "type": "drupal-module",
+    "license": "GPL-3.0-only",
+    "require": {
+        "discoverygarden/embargo": "^1",
+        "discoverygarden/islandora_member_of_entailment": "^1"
+    },
+    "require-dev": {
+        "discoverygarden/islandora_test_support": "^1"
+    }
+}
