@@ -5,12 +5,7 @@
  * General hook implementations.
  */
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\embargo_inheritance\EmbargoStorage;
-use Drupal\embargo_inheritance\Handlers\Embargo;
-use Drupal\embargo_inheritance\Handlers\HandlerInterface;
-use Drupal\embargo_inheritance\Handlers\Media;
-use Drupal\embargo_inheritance\Handlers\Node;
 
 /**
  * Implements hook_entity_type_alter().
@@ -18,115 +13,4 @@ use Drupal\embargo_inheritance\Handlers\Node;
 function embargo_inheritance_entity_type_alter(array &$entity_types) : void {
   /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
   $entity_types['embargo']->setStorageClass(EmbargoStorage::class);
-  $entity_types['embargo']->setHandlerClass(HandlerInterface::KEY, Embargo::class);
-  $entity_types['node']->setHandlerClass(HandlerInterface::KEY, Node::class);
-  $entity_types['media']->setHandlerClass(HandlerInterface::KEY, Media::class);
-}
-
-/**
- * Implements hook_ENTITY_TYPE_insert() for embargo entities.
- */
-function embargo_inheritance_embargo_insert(EntityInterface $entity) : void {
-  /** @var \Drupal\embargo_inheritance\Handlers\HandlerInterface $handler */
-  $handler = \Drupal::entityTypeManager()->getHandler(
-    $entity->getEntityTypeId(),
-    HandlerInterface::KEY,
-  );
-  $handler->handleCreate($entity);
-}
-
-/**
- * Implements hook_ENTITY_TYPE_update() for embargo entities.
- */
-function embargo_inheritance_embargo_update(EntityInterface $entity) : void {
-  /** @var \Drupal\embargo_inheritance\Handlers\HandlerInterface $handler */
-  $handler = \Drupal::entityTypeManager()->getHandler(
-    $entity->getEntityTypeId(),
-    HandlerInterface::KEY,
-  );
-  $handler->handleUpdate($entity);
-}
-
-/**
- * Implements hook_ENTITY_TYPE_delete() for embargo entities.
- */
-function embargo_inheritance_embargo_delete(EntityInterface $entity) : void {
-  /** @var \Drupal\embargo_inheritance\Handlers\HandlerInterface $handler */
-  $handler = \Drupal::entityTypeManager()->getHandler(
-    $entity->getEntityTypeId(),
-    HandlerInterface::KEY,
-  );
-  $handler->handleDelete($entity);
-}
-
-/**
- * Implements hook_ENTITY_TYPE_insert() for node entities.
- */
-function embargo_inheritance_node_insert(EntityInterface $entity) : void {
-  /** @var \Drupal\embargo_inheritance\Handlers\HandlerInterface $handler */
-  $handler = \Drupal::entityTypeManager()->getHandler(
-    $entity->getEntityTypeId(),
-    HandlerInterface::KEY,
-  );
-  $handler->handleCreate($entity);
-}
-
-/**
- * Implements hook_ENTITY_TYPE_update() for node entities.
- */
-function embargo_inheritance_node_update(EntityInterface $entity) : void {
-  /** @var \Drupal\embargo_inheritance\Handlers\HandlerInterface $handler */
-  $handler = \Drupal::entityTypeManager()->getHandler(
-    $entity->getEntityTypeId(),
-    HandlerInterface::KEY,
-  );
-  $handler->handleUpdate($entity);
-}
-
-/**
- * Implements hook_ENTITY_TYPE_delete() for node entities.
- */
-function embargo_inheritance_node_delete(EntityInterface $entity) : void {
-  /** @var \Drupal\embargo_inheritance\Handlers\HandlerInterface $handler */
-  $handler = \Drupal::entityTypeManager()->getHandler(
-    $entity->getEntityTypeId(),
-    HandlerInterface::KEY,
-  );
-  $handler->handleDelete($entity);
-}
-
-/**
- * Implements hook_ENTITY_TYPE_insert() for media entities.
- */
-function embargo_inheritance_media_insert(EntityInterface $entity) : void {
-  /** @var \Drupal\embargo_inheritance\Handlers\HandlerInterface $handler */
-  $handler = \Drupal::entityTypeManager()->getHandler(
-    $entity->getEntityTypeId(),
-    HandlerInterface::KEY,
-  );
-  $handler->handleCreate($entity);
-}
-
-/**
- * Implements hook_ENTITY_TYPE_update() for media entities.
- */
-function embargo_inheritance_media_update(EntityInterface $entity) : void {
-  /** @var \Drupal\embargo_inheritance\Handlers\HandlerInterface $handler */
-  $handler = \Drupal::entityTypeManager()->getHandler(
-    $entity->getEntityTypeId(),
-    HandlerInterface::KEY,
-  );
-  $handler->handleUpdate($entity);
-}
-
-/**
- * Implements hook_ENTITY_TYPE_delete() for media entities.
- */
-function embargo_inheritance_media_delete(EntityInterface $entity) : void {
-  /** @var \Drupal\embargo_inheritance\Handlers\HandlerInterface $handler */
-  $handler = \Drupal::entityTypeManager()->getHandler(
-    $entity->getEntityTypeId(),
-    HandlerInterface::KEY,
-  );
-  $handler->handleDelete($entity);
 }
