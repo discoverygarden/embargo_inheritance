@@ -9,6 +9,7 @@ use Drupal\embargo\EmbargoStorageInterface;
 use Drupal\embargo\EmbargoStorageTrait;
 use Drupal\file\FileInterface;
 use Drupal\islandora_hierarchical_access\LUTGeneratorInterface;
+use Drupal\islandora_member_of_entailment\Plugin\DatabaseAdapterInterface;
 use Drupal\media\MediaInterface;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -21,12 +22,25 @@ class EmbargoStorage extends SqlContentEntityStorage implements EmbargoStorageIn
   use EmbargoStorageTrait;
 
   /**
+   * Database adapter instance for the current database.
+   *
+   * @var \Drupal\islandora_member_of_entailment\Plugin\DatabaseAdapterInterface
+   */
+  protected DatabaseAdapterInterface $adapter;
+
+  /**
    * {@inheritDoc}
    */
   public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) : self {
-    return parent::createInstance($container, $entity_type)
+    $instance = parent::createInstance($container, $entity_type)
       ->setRequest($container->get('request_stack')->getCurrentRequest())
       ->setUser($container->get('current_user'));
+
+    /** @var \Drupal\islandora_member_of_entailment\Plugin\DatabaseAdapterManagerInterface $manager */
+    $manager = $container->get('plugin.manager.islandora_member_of_entailment.database_adapter');
+    $instance->adapter = $manager->getDatabaseAdapterPlugin();
+
+    return $instance;
   }
 
   /**
@@ -36,7 +50,7 @@ class EmbargoStorage extends SqlContentEntityStorage implements EmbargoStorageIn
     $query = $this->database->select('embargo', 'e')
       ->fields('e', ['id'])
       ->distinct();
-    $member_lut = $query->leftJoin('islandora_member_of_entailment', 'imoe', '%alias.aid = e.embargoed_node');
+    $member_lut = $query->leftJoin($this->adapter->getTableName(), 'imoe', '%alias.aid = e.embargoed_node');
 
     if ($entity instanceof NodeInterface) {
       $query->condition(
