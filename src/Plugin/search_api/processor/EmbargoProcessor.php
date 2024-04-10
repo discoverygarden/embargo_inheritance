@@ -2,14 +2,9 @@
 
 namespace Drupal\embargo_inheritance\Plugin\search_api\processor;
 
-use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\embargo\Plugin\search_api\processor\EmbargoJoinProcessor;
 use Drupal\islandora_member_of_entailment\Plugin\DatabaseAdapterManagerInterface;
-use Drupal\search_api\Datasource\DatasourceInterface;
-use Drupal\search_api\Item\ItemInterface;
-use Drupal\search_api\Processor\ProcessorProperty;
-use Drupal\search_api\Query\QueryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
