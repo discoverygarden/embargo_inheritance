@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @SearchApiProcessor(
  *   id = "embargo_inheritance_join_processor",
  *   label = @Translation("Embargo inheritance, join-wise"),
- *   description = @Translation("Add information regarding embargo access constraints from nodes and their ancestors."),
+ *   description = @Translation("Add information regarding embargo access constraints from nodes and their ancestors. Includes behaviors obviating the need for the base 'Embargo access, join-wise' processor."),
  *   stages = {
  *     "add_properties" = 0,
  *     "pre_index_save" = 0,
