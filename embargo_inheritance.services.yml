@@ -1,4 +1,2 @@
 ---
-services:
-  embargo_inheritance.processor_alter_event_subscriber:
-    class: Drupal\embargo_inheritance\EventSubscriber\ProcessorAlterEventSubscriber
+services: {}
