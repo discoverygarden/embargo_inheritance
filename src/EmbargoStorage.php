@@ -9,7 +9,7 @@ use Drupal\embargo\EmbargoStorageInterface;
 use Drupal\embargo\EmbargoStorageTrait;
 use Drupal\file\FileInterface;
 use Drupal\islandora_hierarchical_access\LUTGeneratorInterface;
-use Drupal\islandora_member_of_entailment\Plugin\DatabaseAdapterInterface;
+use Drupal\islandora_member_of_entailment\Plugin\DatabaseAdapterManagerInterface;
 use Drupal\media\MediaInterface;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -22,11 +22,11 @@ class EmbargoStorage extends SqlContentEntityStorage implements EmbargoStorageIn
   use EmbargoStorageTrait;
 
   /**
-   * Database adapter instance for the current database.
+   * Database adapter plugin manager.
    *
-   * @var \Drupal\islandora_member_of_entailment\Plugin\DatabaseAdapterInterface
+   * @var \Drupal\islandora_member_of_entailment\Plugin\DatabaseAdapterManagerInterface
    */
-  protected DatabaseAdapterInterface $adapter;
+  protected DatabaseAdapterManagerInterface $adapterManager;
 
   /**
    * {@inheritDoc}
@@ -36,9 +36,7 @@ class EmbargoStorage extends SqlContentEntityStorage implements EmbargoStorageIn
       ->setRequest($container->get('request_stack')->getCurrentRequest())
       ->setUser($container->get('current_user'));
 
-    /** @var \Drupal\islandora_member_of_entailment\Plugin\DatabaseAdapterManagerInterface $manager */
-    $manager = $container->get('plugin.manager.islandora_member_of_entailment.database_adapter');
-    $instance->adapter = $manager->getDatabaseAdapterPlugin();
+    $instance->adapterManager = $container->get('plugin.manager.islandora_member_of_entailment.database_adapter');
 
     return $instance;
   }
@@ -47,10 +45,14 @@ class EmbargoStorage extends SqlContentEntityStorage implements EmbargoStorageIn
    * {@inheritDoc}
    */
   public function getApplicableEmbargoes(EntityInterface $entity): array {
+    if (!in_array($entity->getEntityTypeId(), EmbargoStorageInterface::APPLICABLE_ENTITY_TYPES)) {
+      return [];
+    }
+
     $query = $this->database->select('embargo', 'e')
       ->fields('e', ['id'])
       ->distinct();
-    $member_lut = $query->leftJoin($this->adapter->getTableName(), 'imoe', '%alias.aid = e.embargoed_node');
+    $member_lut = $query->leftJoin($this->adapterManager->getDatabaseAdapterPlugin()->getTableName(), 'imoe', '%alias.aid = e.embargoed_node');
 
     if ($entity instanceof NodeInterface) {
       $query->condition(
