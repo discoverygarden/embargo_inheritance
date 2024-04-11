@@ -12,11 +12,21 @@ trait SetupTrait {
   use UpstreamTrait;
 
   /**
+   * Flag to determine if things have already run.
+   *
+   * @var bool
+   */
+  private bool $setup = FALSE;
+
+  /**
    * Do common setup.
    */
-  public function doEmbargoInheritanceSetup() : void {
-    $this->doIslandoraMemberOfEntailmentSetup();
-    $this->enableModuleWithDependencies(['embargo_inheritance']);
+  protected function doEmbargoInheritanceSetup() : void {
+    if (!$this->setup) {
+      $this->setup = TRUE;
+      $this->doIslandoraMemberOfEntailmentSetup();
+      $this->enableModuleWithDependencies(['embargo_inheritance']);
+    }
   }
 
 }
