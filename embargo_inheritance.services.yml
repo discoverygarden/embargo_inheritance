@@ -1,2 +1,9 @@
 ---
-services: {}
+services:
+  embargo_inheritance.tagging_event_subscriber:
+    class: Drupal\embargo_inheritance\EventSubscriber\TaggingEventSubscriber
+    factory: [ null, 'create' ]
+    arguments:
+      - '@service_container'
+    tags:
+      - { name: 'event_subscriber' }
