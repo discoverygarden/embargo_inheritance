@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\embargo_inheritance\Kernel;
+namespace Drupal\Tests\embargo_inheritance\Kernel\Base;
 
 use Drupal\Tests\embargo\Kernel\FileEmbargoTest as Upstream;
 use Drupal\Tests\embargo_inheritance\Traits\SetupTrait;
