@@ -30,7 +30,7 @@ class TaggingEventSubscriber implements EventSubscriberInterface, ContainerInjec
   /**
    * {@inheritDoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container) : self {
     return new static(
       $container->get('database'),
       $container->get('plugin.manager.islandora_member_of_entailment.database_adapter'),
@@ -40,7 +40,7 @@ class TaggingEventSubscriber implements EventSubscriberInterface, ContainerInjec
   /**
    * {@inheritDoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents() : array {
     return [
       EmbargoEvents::TAG_INCLUSION => 'inclusion',
       EmbargoEvents::TAG_EXCLUSION => ['exclusion', 10],
