@@ -52,11 +52,13 @@ class EmbargoProcessor extends EmbargoJoinProcessor {
    */
   protected function findRelatedNodes(EntityInterface $entity): array {
     $direct_nodes = parent::findRelatedNodes($entity);
-    $ancestor_nodes = $this->database->select($this->adapterManager->getDatabaseAdapterPlugin()->getTableName(), 'lut')
-      ->fields('lut', ['aid'])
-      ->condition('nid', $direct_nodes)
-      ->execute()
-      ->fetchCol();
+    $ancestor_nodes = $direct_nodes ?
+      $this->database->select($this->adapterManager->getDatabaseAdapterPlugin()->getTableName(), 'lut')
+        ->fields('lut', ['aid'])
+        ->condition('nid', $direct_nodes)
+        ->execute()
+        ->fetchCol() :
+      [];
 
     return array_merge(
       $direct_nodes,
