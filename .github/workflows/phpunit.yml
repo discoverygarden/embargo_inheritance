@@ -11,6 +11,9 @@ jobs:
     uses: discoverygarden/phpunit-action/.github/workflows/phpunit.yml@v1
     secrets: inherit
     with:
+      composer_prereqs: >-
+        "discoverygarden/islandora_member_of_entailment:dev-implementation as 1.x-dev"
+        "discoverygarden/embargo:dev-feature/generalize as 1.x-dev"
       composer_patches: |
         {
           "discoverygarden/islandora_test_support": {
