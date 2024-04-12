@@ -20,6 +20,9 @@ class TaggingEventSubscriber implements EventSubscriberInterface, ContainerInjec
 
   use DependencySerializationTrait;
 
+  /**
+   * Constructor.
+   */
   public function __construct(
     protected Connection $database,
     protected DatabaseAdapterManagerInterface $databaseAdapterManager,
