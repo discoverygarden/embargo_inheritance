@@ -13,9 +13,6 @@ jobs:
     with:
       composer_patches: |
         {
-          "discoverygarden/islandora_test_support": {
-            "AUCIR-198: Node bundle use": "https://patch-diff.githubusercontent.com/raw/discoverygarden/islandora_test_support/pull/6.patch"
-          },
           "drupal/core": {
             "https://www.drupal.org/project/drupal/issues/2920527": "https://www.drupal.org/files/issues/2022-01-11/2920527-26.patch"
           }
