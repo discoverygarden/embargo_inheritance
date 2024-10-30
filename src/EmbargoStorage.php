@@ -58,7 +58,7 @@ class EmbargoStorage extends SqlContentEntityStorage implements EmbargoStorageIn
       $member_query->condition("{$member_lut}.nid", $entity->id());
       $query = (clone $base_query)
         ->condition('e.embargoed_node', $entity->id())
-        ->union($member_query);
+        ->union($member_query, 'ALL');
     }
     elseif ($entity instanceof MediaInterface || $entity instanceof FileInterface) {
       $iha_query = $this->database->select(LUTGeneratorInterface::TABLE_NAME, 'lut')
@@ -71,13 +71,14 @@ class EmbargoStorage extends SqlContentEntityStorage implements EmbargoStorageIn
       $member_query->condition("{$member_lut}.nid", $iha_query, 'IN');
       $query = (clone $base_query)
         ->condition('e.embargoed_node', $iha_query, 'IN')
-        ->union($member_query);
+        ->union($member_query, 'ALL');
     }
     else {
       throw new \InvalidArgumentException("Unrecognized type: {$entity->getEntityTypeId()}");
     }
 
-    $ids = array_unique($query->execute()->fetchCol());
+    $results = $query->execute();
+    $ids = array_unique($results->fetchCol());
     return $this->loadMultiple($ids);
   }
 
