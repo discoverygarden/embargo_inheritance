@@ -49,28 +49,35 @@ class EmbargoStorage extends SqlContentEntityStorage implements EmbargoStorageIn
       return [];
     }
 
-    $query = $this->database->select('embargo', 'e')
-      ->fields('e', ['id'])
-      ->distinct();
-    $member_lut = $query->leftJoin($this->adapterManager->getDatabaseAdapterPlugin()->getTableName(), 'imoe', '%alias.aid = e.embargoed_node');
+    $base_query = $this->database->select('embargo', 'e')
+      ->fields('e', ['id']);
 
     if ($entity instanceof NodeInterface) {
-      $query->condition(
-        $query->orConditionGroup()
-          ->condition('e.embargoed_node', $entity->id())
-          ->condition("{$member_lut}.nid", $entity->id())
-      );
+      $member_query = (clone $base_query);
+      $member_lut = $member_query->join($this->adapterManager->getDatabaseAdapterPlugin()->getTableName(), 'imoe', '%alias.aid = e.embargoed_node');
+      $member_query->condition("{$member_lut}.nid", $entity->id());
+      $query = (clone $base_query)
+        ->condition('e.embargoed_node', $entity->id())
+        ->union($member_query);
     }
     elseif ($entity instanceof MediaInterface || $entity instanceof FileInterface) {
-      $lut_alias = $query->join(LUTGeneratorInterface::TABLE_NAME, 'lut', "%alias.nid = e.embargoed_node OR %alias.nid = {$member_lut}.nid");
+      $iha_query = $this->database->select(LUTGeneratorInterface::TABLE_NAME, 'lut')
+        ->fields('lut', ['nid']);
       $key = $entity instanceof MediaInterface ? 'mid' : 'fid';
-      $query->condition("{$lut_alias}.{$key}", $entity->id());
+      $iha_query->condition("lut.{$key}", $entity->id());
+
+      $member_query = (clone $base_query);
+      $member_lut = $member_query->join($this->adapterManager->getDatabaseAdapterPlugin()->getTableName(), 'imoe', '%alias.aid = e.embargoed_node');
+      $member_query->condition("{$member_lut}.nid", $iha_query, 'IN');
+      $query = (clone $base_query)
+        ->condition('e.embargoed_node', $iha_query, 'IN')
+        ->union($member_query);
     }
     else {
       throw new \InvalidArgumentException("Unrecognized type: {$entity->getEntityTypeId()}");
     }
 
-    $ids = $query->execute()->fetchCol();
+    $ids = array_unique($query->execute()->fetchCol());
     return $this->loadMultiple($ids);
   }
 
