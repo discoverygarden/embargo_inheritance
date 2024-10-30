@@ -2,6 +2,7 @@
 
 namespace Drupal\embargo_inheritance;
 
+use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
@@ -49,16 +50,19 @@ class EmbargoStorage extends SqlContentEntityStorage implements EmbargoStorageIn
       return [];
     }
 
-    $base_query = $this->database->select('embargo', 'e')
-      ->fields('e', ['id']);
-
-    if ($entity instanceof NodeInterface) {
+    $get_query = function (array $conditions) : SelectInterface {
+      $base_query = $this->database->select('embargo', 'e')
+        ->fields('e', ['id']);
       $member_query = (clone $base_query);
       $member_lut = $member_query->join($this->adapterManager->getDatabaseAdapterPlugin()->getTableName(), 'imoe', '%alias.aid = e.embargoed_node');
-      $member_query->condition("{$member_lut}.nid", $entity->id());
-      $query = (clone $base_query)
-        ->condition('e.embargoed_node', $entity->id())
+      $member_query->condition("{$member_lut}.nid", ...$conditions);
+      return (clone $base_query)
+        ->condition('e.embargoed_node', ...$conditions)
         ->union($member_query, 'ALL');
+    };
+
+    if ($entity instanceof NodeInterface) {
+      $query = $get_query([$entity->id()]);
     }
     elseif ($entity instanceof MediaInterface || $entity instanceof FileInterface) {
       $iha_query = $this->database->select(LUTGeneratorInterface::TABLE_NAME, 'lut')
@@ -66,12 +70,7 @@ class EmbargoStorage extends SqlContentEntityStorage implements EmbargoStorageIn
       $key = $entity instanceof MediaInterface ? 'mid' : 'fid';
       $iha_query->condition("lut.{$key}", $entity->id());
 
-      $member_query = (clone $base_query);
-      $member_lut = $member_query->join($this->adapterManager->getDatabaseAdapterPlugin()->getTableName(), 'imoe', '%alias.aid = e.embargoed_node');
-      $member_query->condition("{$member_lut}.nid", $iha_query, 'IN');
-      $query = (clone $base_query)
-        ->condition('e.embargoed_node', $iha_query, 'IN')
-        ->union($member_query, 'ALL');
+      $query = $get_query([$iha_query, 'IN']);
     }
     else {
       throw new \InvalidArgumentException("Unrecognized type: {$entity->getEntityTypeId()}");
