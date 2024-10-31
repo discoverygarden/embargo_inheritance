@@ -2,6 +2,7 @@
 
 namespace Drupal\embargo_inheritance;
 
+use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
@@ -49,28 +50,34 @@ class EmbargoStorage extends SqlContentEntityStorage implements EmbargoStorageIn
       return [];
     }
 
-    $query = $this->database->select('embargo', 'e')
-      ->fields('e', ['id'])
-      ->distinct();
-    $member_lut = $query->leftJoin($this->adapterManager->getDatabaseAdapterPlugin()->getTableName(), 'imoe', '%alias.aid = e.embargoed_node');
+    $get_query = function (array $conditions) : SelectInterface {
+      $base_query = $this->database->select('embargo', 'e')
+        ->fields('e', ['id']);
+      $member_query = (clone $base_query);
+      $member_lut = $member_query->join($this->adapterManager->getDatabaseAdapterPlugin()->getTableName(), 'imoe', '%alias.aid = e.embargoed_node');
+      $member_query->condition("{$member_lut}.nid", ...$conditions);
+      return (clone $base_query)
+        ->condition('e.embargoed_node', ...$conditions)
+        ->union($member_query, 'ALL');
+    };
 
     if ($entity instanceof NodeInterface) {
-      $query->condition(
-        $query->orConditionGroup()
-          ->condition('e.embargoed_node', $entity->id())
-          ->condition("{$member_lut}.nid", $entity->id())
-      );
+      $query = $get_query([$entity->id()]);
     }
     elseif ($entity instanceof MediaInterface || $entity instanceof FileInterface) {
-      $lut_alias = $query->join(LUTGeneratorInterface::TABLE_NAME, 'lut', "%alias.nid = e.embargoed_node OR %alias.nid = {$member_lut}.nid");
+      $iha_query = $this->database->select(LUTGeneratorInterface::TABLE_NAME, 'lut')
+        ->fields('lut', ['nid']);
       $key = $entity instanceof MediaInterface ? 'mid' : 'fid';
-      $query->condition("{$lut_alias}.{$key}", $entity->id());
+      $iha_query->condition("lut.{$key}", $entity->id());
+
+      $query = $get_query([$iha_query, 'IN']);
     }
     else {
       throw new \InvalidArgumentException("Unrecognized type: {$entity->getEntityTypeId()}");
     }
 
-    $ids = $query->execute()->fetchCol();
+    $results = $query->execute();
+    $ids = array_unique($results->fetchCol());
     return $this->loadMultiple($ids);
   }
 

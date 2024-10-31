@@ -14,6 +14,6 @@ jobs:
       composer_patches: |
         {
           "drupal/core": {
-            "https://www.drupal.org/project/drupal/issues/2920527": "https://www.drupal.org/files/issues/2022-01-11/2920527-26.patch"
+            "https://www.drupal.org/project/drupal/issues/2920527": "https://www.drupal.org/files/issues/2024-01-24/2920527-37.patch"
           }
         }
