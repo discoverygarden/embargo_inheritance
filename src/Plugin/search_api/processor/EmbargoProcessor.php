@@ -55,7 +55,7 @@ class EmbargoProcessor extends EmbargoJoinProcessor {
     $ancestor_nodes = $direct_nodes ?
       $this->database->select($this->adapterManager->getDatabaseAdapterPlugin()->getTableName(), 'lut')
         ->fields('lut', ['aid'])
-        ->condition('nid', $direct_nodes)
+        ->condition('nid', $direct_nodes, 'IN')
         ->execute()
         ->fetchCol() :
       [];
