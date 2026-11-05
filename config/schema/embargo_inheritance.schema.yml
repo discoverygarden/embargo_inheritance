@@ -1,0 +1,2 @@
+plugin.plugin_configuration.search_api_processor.embargo_inheritance_join_processor:
+  type: plugin.plugin_configuration.search_api_processor.embargo_join_processor
